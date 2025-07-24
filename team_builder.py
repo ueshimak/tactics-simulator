@@ -68,16 +68,24 @@ def build_team(team_name, members, tactics_map=None, overrides=None, 兵種="足
     for name in members:
         info = get_officer_info(name)
         if info:
-            if overrides and name in overrides:
-                for key, value in overrides[name].items():
-                    if key in info:
-                        info[key] = value
+            # ステータス補完処理
+            stats = overrides.get(name) if overrides and name in overrides else {
+                "統率": info.get("統率", 0),
+                "武勇": info.get("武勇", 0),
+                "知略": info.get("知略", 0),
+                "政治": info.get("政治", 0),
+                "速度": info.get("速度", 0)
+            }
+            for key in stats:
+                info[key] = stats[key]
+
+            # 自由戦法の割り当て（あれば）
             if tactics_map and name in tactics_map:
                 info = assign_free_tactics(info, tactics_map[name])
+
             team["武将"].append(info)
         else:
             print(f"⚠️ 武将 '{name}' は存在しません")
-
 
     save_path = os.path.join(BUILD_DIR, f"{team_name}.json")
     with open(save_path, "w", encoding="utf-8") as f:
@@ -93,27 +101,7 @@ def load_team(team_name):
 
     with open(path, "r", encoding="utf-8") as f:
         team = json.load(f)
-
-    return team  # ✅ JSON構造をそのまま返す（武将詳細を含む）
-
-
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    result = {
-        "編成名": data["編成名"],
-        "兵種": data["兵種"],
-        "陣形": data["陣形"],
-        "武将": [],
-        "戦法": {}
-    }
-
-    for officer in data.get("武将", []):
-        name = officer["武将名"]
-        result["武将"].append(name)
-        result["戦法"][name] = officer.get("自由戦法", [])
-
-    return result
+    return team
 
 # === 保存済み編成一覧 ===
 def list_teams():

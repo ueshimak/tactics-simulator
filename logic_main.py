@@ -142,6 +142,19 @@ def handle_team_definition():
 def handle_simulation_run():
     st.subheader("⚔️ シミュレーション実行")
 
+    def extract_stats(w):
+        if "ステータス" in w:
+            return w["ステータス"]
+        else:
+            # トップ階層に展開されているケース
+            return {
+                "統率": w.get("統率", 0),
+                "武勇": w.get("武勇", 0),
+                "知略": w.get("知略", 0),
+                "政治": w.get("政治", 0),
+                "速度": w.get("速度", 0)
+            }
+
     # ✅ 既存編成から選択
     my_team = st.selectbox("自軍編成を選択（保存済み）", list_teams())
     enemy_team = st.selectbox("敵軍編成を選択", list_teams())
@@ -160,7 +173,7 @@ def handle_simulation_run():
 
         temp_name = "web_uploaded_team"
         武将名一覧 = [w["武将名"] for w in uploaded_data["武将"]]
-        overrides = {w["武将名"]: w["ステータス"] for w in uploaded_data["武将"]}
+        overrides = {w["武将名"]: extract_stats(w) for w in uploaded_data["武将"]}
         tactics_map = {w["武将名"]: w.get("自由戦法", []) for w in uploaded_data["武将"]}
         兵種 = uploaded_data.get("兵種", "足軽")
         陣形 = uploaded_data.get("陣形", "方円陣")
