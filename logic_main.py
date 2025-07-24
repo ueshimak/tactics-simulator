@@ -12,6 +12,7 @@ from team_builder import (
 from simulator import simulate_battle
 from optimizer import optimizer
 
+
 NAME_MAP = {
     "立花闇千代": "立花誾千代",
 }
